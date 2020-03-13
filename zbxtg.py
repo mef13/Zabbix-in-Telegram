@@ -925,7 +925,8 @@ def main():
                 print_message(text_warn)
             else:
                 if not is_single_message:
-                    zbxtg_body_text = ""
+                    if not zbxtg_settings.zbx_tg_update_graph_messages:
+                        zbxtg_body_text = ""
                 else:
                     if is_modified:
                         text_warn = "probably you will see MEDIA_CAPTION_TOO_LONG error, "\
