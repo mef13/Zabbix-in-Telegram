@@ -76,6 +76,9 @@ class TelegramAPI:
         return self.result
 
     def send_message(self, to, message):
+        if zbxtg_settings.zbx_tg_update_graph_messages and len(zbxtg_settings.zbx_tg_update_splash_img) > 1 \
+                and os.path.isfile(zbxtg_settings.zbx_tg_update_splash_img):
+            return self.send_photo(to, message, zbxtg_settings.zbx_tg_update_splash_img)
         url = self.tg_url_bot_general + self.key + "/sendMessage"
         message = "\n".join(message)
         params = {"chat_id": to, "text": message, "disable_web_page_preview": self.disable_web_page_preview,
@@ -119,7 +122,24 @@ class TelegramAPI:
         self.ok_update()
         return self.result
 
+    def update_message_media(self, to, message, path):
+        url = self.tg_url_bot_general + self.key + "/editMessageMedia"
+        message = "\n".join(message)
+        reply_markup = json.dumps({})
+        params = {"chat_id": to, "message_id": self.reply_to_message_id, "reply_markup": reply_markup,
+                  "media": '{"type": "photo", "media": "attach://photo", "caption": "' + message + '"}'}
+        files = {"photo": open(path, 'rb')}
+        print_message("Trying to /editMessageMedia:")
+        print_message(url)
+        print_message("post params: " + str(params))
+        answer = requests.post(url, params=params, files=files, proxies=self.proxies)
+        self.result = answer.json()
+        self.ok_update()
+        return self.result
+
     def send_photo(self, to, message, path):
+        if zbxtg_settings.zbx_tg_update_graph_messages and self.reply_to_message_id:
+            return self.update_message_media(to, message, path)
         url = self.tg_url_bot_general + self.key + "/sendPhoto"
         message = "\n".join(message)
         if self.image_buttons:

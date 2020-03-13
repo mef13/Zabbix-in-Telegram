@@ -7,6 +7,9 @@ zbx_tg_tmp_dir = "/var/tmp/" + zbx_tg_prefix  # directory for saving caches, uid
 zbx_tg_signature = False
 
 zbx_tg_update_messages = True
+zbx_tg_update_graph_messages = False
+zbx_tg_update_splash_img = ""
+
 zbx_tg_matches = {
     "problem": "PROBLEM: ",
     "ok": "OK: "
