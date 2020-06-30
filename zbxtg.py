@@ -75,9 +75,10 @@ class TelegramAPI:
         self.ok_update()
         return self.result
 
-    def send_message(self, to, message):
-        if zbxtg_settings.zbx_tg_update_graph_messages and len(zbxtg_settings.zbx_tg_update_splash_img) > 1 \
-                and os.path.isfile(zbxtg_settings.zbx_tg_update_splash_img):
+    def send_message(self, to, message, is_attach_image=True):
+        if is_attach_image and zbxtg_settings.zbx_tg_update_graph_messages and \
+                len(zbxtg_settings.zbx_tg_update_splash_img) > 1 and \
+                os.path.isfile(zbxtg_settings.zbx_tg_update_splash_img):
             return self.send_photo(to, message, zbxtg_settings.zbx_tg_update_splash_img)
         url = self.tg_url_bot_general + self.key + "/sendMessage"
         message = "\n".join(message)
@@ -864,7 +865,7 @@ def main():
         zbxtg_body_text = zbxtg_body_text_emoji_support
 
     if not is_single_message:
-        tg.send_message(uid, zbxtg_body_text)
+        tg.send_message(uid, zbxtg_body_text, tg_method_image)
         if not tg.ok:
             # first case – if group has been migrated to a supergroup, we need to update chat_id of that group
             if tg.error.find("migrated") > -1 and tg.error.find("supergroup") > -1:
@@ -872,7 +873,7 @@ def main():
                 tg.update_cache_uid(zbx_to, migrate_to_chat_id, message="Group chat is migrated to supergroup, "
                                                                         "updating cache file")
                 uid = migrate_to_chat_id
-                tg.send_message(uid, zbxtg_body_text)
+                tg.send_message(uid, zbxtg_body_text, tg_method_image)
 
             # another case if markdown is enabled and we got parse error, try to remove "bad" symbols from message
             if tg.markdown and tg.error.find("Can't find end of the entity starting at byte offset") > -1:
@@ -886,7 +887,7 @@ def main():
                     zbxtg_body_text = markdown_fix(zbxtg_body_text, offset, emoji=internal_using_emoji) + \
                                       ["\n"] + [markdown_warning]
                     tg.disable_web_page_preview = True
-                    tg.send_message(uid, zbxtg_body_text)
+                    tg.send_message(uid, zbxtg_body_text, tg_method_image)
                     markdown_fix_attempts += 1
                 if tg.ok:
                     print_message(markdown_warning)
@@ -905,7 +906,7 @@ def main():
         if not zbx.cookie:
             text_warn = "Login to Zabbix web UI has failed (web url, user or password are incorrect), " \
                         "unable to send graphs check manually"
-            tg.send_message(uid, [text_warn])
+            tg.send_message(uid, [text_warn], tg_method_image)
             print_message(text_warn)
         else:
             if not settings["extimg"]:
@@ -920,7 +921,7 @@ def main():
             tg.reply_to_message_id = message_id
             if not zbxtg_file_img:
                 text_warn = "Can't get graph image, check script manually, see logs, or disable graphs"
-                tg.send_message(uid, [text_warn])
+                tg.send_message(uid, [text_warn], tg_method_image)
                 print_message(text_warn)
             else:
                 if not is_single_message:
@@ -946,7 +947,7 @@ def main():
                         text_warn = "Zabbix user couldn't get graph (probably has no rights to get data from host), " \
                                     "check script manually, see {0}".format(url_wiki_base + "/" +
                                                                             settings_description["graphs"]["url"])
-                        tg.send_message(uid, [text_warn])
+                        tg.send_message(uid, [text_warn], tg_method_image)
                         print_message(text_warn)
     if tg.location and location_coordinates["latitude"] and location_coordinates["longitude"]:
         tg.reply_to_message_id = message_id
