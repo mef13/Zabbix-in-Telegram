@@ -12,7 +12,7 @@ import re
 import stat
 import hashlib
 import subprocess
-#import sqlite3
+# import sqlite3
 from os.path import dirname
 import zbxtg_settings
 
@@ -288,7 +288,7 @@ def markdown_fix(message, offset, emoji=False):
     if emoji:  # https://github.com/ableev/Zabbix-in-Telegram/issues/152
         offset -= 2
     message = "\n".join(message)
-    message = message[:offset] + message[offset+1:]
+    message = message[:offset] + message[offset + 1:]
     message = message.split("\n")
     return message
 
@@ -324,7 +324,7 @@ class ZabbixWeb:
         self.cookie = cookie
 
     def graph_get(self, itemid, period, title, width, height, version=3):
-        file_img = "{0}/{1}.png".format(self.tmp_dir,                                                   
+        file_img = "{0}/{1}.png".format(self.tmp_dir,
                                         "".join(random.choice(string.ascii_letters) for e in range(10)))
 
         title = requests.utils.quote(title)
@@ -371,7 +371,7 @@ class ZabbixWeb:
     def api_test(self):
         headers = {'Content-type': 'application/json'}
         api_data = json.dumps({"jsonrpc": "2.0", "method": "user.login", "params":
-                              {"user": self.username, "password": self.password}, "id": 1})
+            {"user": self.username, "password": self.password}, "id": 1})
         api_url = self.server + "/api_jsonrpc.php"
         api = requests.post(api_url, data=api_data, proxies=self.proxies, headers=headers)
         return api.text
@@ -482,16 +482,15 @@ def age2sec(age_str):
         if i:
             metric = i[-1]
             if metric == "d":
-                age_sec += int(i[0:-1])*86400
+                age_sec += int(i[0:-1]) * 86400
             if metric == "h":
-                age_sec += int(i[0:-1])*3600
+                age_sec += int(i[0:-1]) * 3600
             if metric == "m":
-                age_sec += int(i[0:-1])*60
+                age_sec += int(i[0:-1]) * 60
     return age_sec
 
 
 def main():
-
     tmp_dir = zbxtg_settings.zbx_tg_tmp_dir
     if tmp_dir == "/tmp/" + zbxtg_settings.zbx_tg_prefix:
         print_message("WARNING: it is strongly recommended to change `zbx_tg_tmp_dir` variable in config!!!")
@@ -599,14 +598,13 @@ def main():
         else:
             print(("Hi. You should provide at least three arguments.\n"
                    "zbxtg.py [TO] [SUBJECT] [BODY]\n\n"
-                  "1. Read main page and/or wiki: {0} + {1}\n"
-                  "2. Public Telegram group (discussion): {2}\n"
-                  "3. Public Telegram channel: {3}\n"
-                  "4. Try dev branch for test purposes (new features, etc): {0}/tree/dev"
-                  .format(url_github, url_wiki_base, url_tg_group, url_tg_channel)))
+                   "1. Read main page and/or wiki: {0} + {1}\n"
+                   "2. Public Telegram group (discussion): {2}\n"
+                   "3. Public Telegram channel: {3}\n"
+                   "4. Try dev branch for test purposes (new features, etc): {0}/tree/dev"
+                   .format(url_github, url_wiki_base, url_tg_group, url_tg_channel)))
         if not do_not_exit:
             sys.exit(0)
-
 
     zbx_to = args[1]
     zbx_subject = args[2]
@@ -716,7 +714,7 @@ def main():
         print_message(tg.get_me())
         print_message("Cache file with uids: " + tg.tmp_uids)
         log_file = tmp_dir + ".debug." + hash_ts + ".log"
-        #print_message(log_file)
+        # print_message(log_file)
 
     if "--markdown" in args or settings["markdown"]:
         tg.markdown = True
@@ -773,7 +771,7 @@ def main():
     to_types_to_telegram = {"to": "private", "to_group": "group", "to_channel": "channel"}
     multiple_to = {}
     for i in to_types:
-        multiple_to[i]=[]
+        multiple_to[i] = []
 
     for t in to_types:
         try:
@@ -841,7 +839,7 @@ def main():
 
     # add signature, turned off by default, you can turn it on in config
     try:
-        if "--signature" in args or settings["signature"] or zbxtg_settings.zbx_tg_signature\
+        if "--signature" in args or settings["signature"] or zbxtg_settings.zbx_tg_signature \
                 and not "--signature_disable" in args and not settings["signature_disable"]:
             if "--signature" in args:
                 settings["signature"] = args[args.index("--signature") + 1]
@@ -879,11 +877,12 @@ def main():
             # another case if markdown is enabled and we got parse error, try to remove "bad" symbols from message
             if tg.markdown and tg.error.find("Can't find end of the entity starting at byte offset") > -1:
                 markdown_warning = "Original message has been fixed due to {0}. " \
-                                   "Please, fix the markdown, it's slowing down messages sending."\
+                                   "Please, fix the markdown, it's slowing down messages sending." \
                     .format(url_wiki_base + "/" + settings_description["markdown"]["url"])
                 markdown_fix_attempts = 0
                 while not tg.ok and markdown_fix_attempts != 3:
-                    offset = re.search("Can't find end of the entity starting at byte offset ([0-9]+)", tg.error).group(1)
+                    offset = re.search("Can't find end of the entity starting at byte offset ([0-9]+)", tg.error).group(
+                        1)
                     zbxtg_body_text = markdown_fix(zbxtg_body_text, offset, emoji=internal_using_emoji) + \
                                       ["\n"] + [markdown_warning]
                     tg.disable_web_page_preview = True
@@ -904,7 +903,7 @@ def main():
     if tg_method_image:
         zbx.login()
         if not zbx.cookie:
-            text_warn = "Login to Zabbix web UI has failed (web url, user or password are incorrect), "\
+            text_warn = "Login to Zabbix web UI has failed (web url, user or password are incorrect), " \
                         "unable to send graphs check manually"
             tg.send_message(uid, [text_warn])
             print_message(text_warn)
@@ -929,9 +928,9 @@ def main():
                         zbxtg_body_text = ""
                 else:
                     if is_modified:
-                        text_warn = "probably you will see MEDIA_CAPTION_TOO_LONG error, "\
-                                    "the message has been cut to 200 symbols, "\
-                                    "https://github.com/ableev/Zabbix-in-Telegram/issues/9"\
+                        text_warn = "probably you will see MEDIA_CAPTION_TOO_LONG error, " \
+                                    "the message has been cut to 200 symbols, " \
+                                    "https://github.com/ableev/Zabbix-in-Telegram/issues/9" \
                                     "#issuecomment-166895044"
                         print_message(text_warn)
                 if not is_single_message:
@@ -956,6 +955,7 @@ def main():
 
     if "--show-settings" in args:
         print_message("Settings: " + str(json.dumps(settings, indent=2)))
+
 
 if __name__ == "__main__":
     main()
